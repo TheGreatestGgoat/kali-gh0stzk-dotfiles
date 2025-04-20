@@ -13,6 +13,9 @@
 # Modified by xxxenos
 #
 
+# Define the scripts directory
+SCRIPTS_DIR="./kali-scripts"
+
 # Define text colors
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -50,19 +53,25 @@ check_script() {
     fi
 }
 
+# Check if kali-scripts directory exists
+if [ ! -d "$SCRIPTS_DIR" ]; then
+    print_error "Directory '$SCRIPTS_DIR' not found! Please make sure you're running this script from the correct location."
+    exit 1
+fi
+
 # Check for all scripts before starting
 print_status "Checking if all required scripts exist..."
-check_script "./InstallDependencies"
-check_script "./InstallEww"
-check_script "./InstallDotFiles"
-check_script "./PostInstallation"
+check_script "${SCRIPTS_DIR}/InstallDependencies"
+check_script "${SCRIPTS_DIR}/InstallEww"
+check_script "${SCRIPTS_DIR}/InstallDotFiles"
+check_script "${SCRIPTS_DIR}/PostInstallation"
 print_success "All scripts found!"
 
 # Execute each script in order
 print_status "Starting installation process..."
 
 print_status "Step 1/4: Installing dependencies..."
-if ./InstallDependencies; then
+if "${SCRIPTS_DIR}/InstallDependencies"; then
     print_success "Dependencies installation completed!"
 else
     print_error "Dependencies installation failed! Exiting."
@@ -70,7 +79,7 @@ else
 fi
 
 print_status "Step 2/4: Installing Eww..."
-if ./InstallEww; then
+if "${SCRIPTS_DIR}/InstallEww"; then
     print_success "Eww installation completed!"
 else
     print_error "Eww installation failed! Exiting."
@@ -78,7 +87,7 @@ else
 fi
 
 print_status "Step 3/4: Installing dotfiles..."
-if ./InstallDotFiles; then
+if "${SCRIPTS_DIR}/InstallDotFiles"; then
     print_success "Dotfiles installation completed!"
 else
     print_error "Dotfiles installation failed! Exiting."
@@ -86,7 +95,7 @@ else
 fi
 
 print_status "Step 4/4: Running post-installation tasks..."
-if ./PostInstallation; then
+if "${SCRIPTS_DIR}/PostInstallation"; then
     print_success "Post-installation tasks completed!"
 else
     print_error "Post-installation tasks failed! Exiting."
