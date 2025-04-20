@@ -15,6 +15,8 @@
 
 # Define the scripts directory
 SCRIPTS_DIR="./kali-scripts"
+# Save the original directory to return to it later
+ORIGINAL_DIR=$(pwd)
 
 # Define text colors
 GREEN='\033[0;32m'
@@ -53,6 +55,35 @@ check_script() {
     fi
 }
 
+# Function to run a script from the kali-scripts directory
+run_script() {
+    script_name="$1"
+    script_path="$SCRIPTS_DIR/$script_name"
+    
+    # Change to the scripts directory to avoid relative path issues
+    cd "$SCRIPTS_DIR" || { 
+        print_error "Could not change to directory: $SCRIPTS_DIR"
+        exit 1
+    }
+    
+    # Run the script by its name (not full path)
+    if ./"$script_name"; then
+        # Change back to original directory
+        cd "$ORIGINAL_DIR" || {
+            print_error "Could not change back to original directory: $ORIGINAL_DIR"
+            exit 1
+        }
+        return 0
+    else
+        # Change back to original directory even if the script fails
+        cd "$ORIGINAL_DIR" || {
+            print_error "Could not change back to original directory: $ORIGINAL_DIR"
+            exit 1
+        }
+        return 1
+    fi
+}
+
 # Check if kali-scripts directory exists
 if [ ! -d "$SCRIPTS_DIR" ]; then
     print_error "Directory '$SCRIPTS_DIR' not found! Please make sure you're running this script from the correct location."
@@ -71,7 +102,7 @@ print_success "All scripts found!"
 print_status "Starting installation process..."
 
 print_status "Step 1/4: Installing dependencies..."
-if "${SCRIPTS_DIR}/InstallDependencies"; then
+if run_script "InstallDependencies"; then
     print_success "Dependencies installation completed!"
 else
     print_error "Dependencies installation failed! Exiting."
@@ -79,7 +110,7 @@ else
 fi
 
 print_status "Step 2/4: Installing Eww..."
-if "${SCRIPTS_DIR}/InstallEww"; then
+if run_script "InstallEww"; then
     print_success "Eww installation completed!"
 else
     print_error "Eww installation failed! Exiting."
@@ -87,7 +118,7 @@ else
 fi
 
 print_status "Step 3/4: Installing dotfiles..."
-if "${SCRIPTS_DIR}/InstallDotFiles"; then
+if run_script "InstallDotFiles"; then
     print_success "Dotfiles installation completed!"
 else
     print_error "Dotfiles installation failed! Exiting."
@@ -95,7 +126,7 @@ else
 fi
 
 print_status "Step 4/4: Running post-installation tasks..."
-if "${SCRIPTS_DIR}/PostInstallation"; then
+if run_script "PostInstallation"; then
     print_success "Post-installation tasks completed!"
 else
     print_error "Post-installation tasks failed! Exiting."
